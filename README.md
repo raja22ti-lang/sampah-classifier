@@ -26,7 +26,7 @@ Aplikasi web interaktif premium untuk mendeteksi, mengklasifikasikan jenis sampa
 ## Struktur Proyek
 
 ```text
-Uas_Arriy/
+ARRY_UASComvis/
 │
 ├── garbage_classifier_mobilenetv2.h5   # File model deep learning Anda
 ├── app.py                              # Backend server Flask
@@ -73,7 +73,7 @@ Jalankan server Flask dengan perintah berikut:
 python app.py
 ```
 Setelah server berjalan, buka browser Anda dan akses alamat:
-**[http://localhost:5000](http://localhost:5000)**
+**[http://localhost:7860](http://localhost:7860)**
 
 ---
 
