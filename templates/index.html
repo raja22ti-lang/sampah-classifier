@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecycleAI - Klasifikasi Sampah Cerdas Berbasis Deep Learning</title>
+    <meta name="description" content="Klasifikasikan sampah Anda secara instan menggunakan kecerdasan buatan. Bantu selamatkan bumi dengan memilah sampah secara tepat.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Background Glow Orbs -->
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+
+    <header class="app-header">
+        <div class="container header-container">
+            <div class="logo-area">
+                <div class="logo-icon-bg">
+                    <i data-lucide="recycle" class="logo-icon"></i>
+                </div>
+                <span class="logo-text">Recycle<span class="highlight">AI</span></span>
+            </div>
+            <div class="nav-status">
+                <span class="status-indicator online" id="model-status-indicator"></span>
+                <span id="model-status-text">Memuat Model...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container app-main">
+        <section class="hero-section">
+            <h1>Deteksi &amp; Klasifikasi Sampah Cerdas</h1>
+            <p>Unggah foto sampah Anda dan AI kami akan mengidentifikasi jenis kategori serta memberikan rekomendasi daur ulang yang tepat untuk kelestarian lingkungan.</p>
+        </section>
+
+        <div class="dashboard-grid">
+            <!-- Left Side: Upload Zone -->
+            <section class="card upload-card">
+                <div class="card-header">
+                    <i data-lucide="image" class="card-header-icon"></i>
+                    <h2>Unggah Gambar</h2>
+                </div>
+                
+                <div class="upload-zone" id="drop-zone">
+                    <input type="file" id="file-input" accept="image/*" class="file-input">
+                    <div class="upload-prompt" id="upload-prompt">
+                        <div class="upload-icon-wrapper">
+                            <i data-lucide="cloud-upload" class="upload-icon"></i>
+                        </div>
+                        <h3>Tarik &amp; Lepaskan Gambar</h3>
+                        <p>Atau klik untuk menelusuri file dari perangkat Anda</p>
+                        <span class="file-limits">Mendukung JPG, JPEG, PNG</span>
+                    </div>
+                    
+                    <div class="preview-container hidden" id="preview-container">
+                        <img id="image-preview" src="#" alt="Pratinjau Sampah">
+                        <button type="button" class="remove-btn" id="remove-image-btn" title="Hapus Gambar">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="action-bar">
+                    <button type="button" id="classify-btn" class="btn btn-primary btn-disabled" disabled>
+                        <i data-lucide="scan-line" class="btn-icon"></i>
+                        <span>Klasifikasikan Sampah</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Right Side: Classification Result -->
+            <section class="card result-card">
+                <div class="card-header">
+                    <i data-lucide="cpu" class="card-header-icon"></i>
+                    <h2>Hasil Analisis AI</h2>
+                </div>
+                
+                <!-- Initial State -->
+                <div class="result-placeholder" id="result-placeholder">
+                    <div class="placeholder-animation">
+                        <div class="scan-radar"></div>
+                        <i data-lucide="leaf" class="placeholder-icon"></i>
+                    </div>
+                    <h3>Menunggu Gambar</h3>
+                    <p>Silakan unggah gambar di panel kiri lalu klik tombol Klasifikasikan untuk memulai analisis model deep learning.</p>
+                </div>
+
+                <!-- Loading State -->
+                <div class="result-loading hidden" id="result-loading">
+                    <div class="spinner-wrapper">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-scanner"></div>
+                    </div>
+                    <h3>Sedang Menganalisis...</h3>
+                    <p>Model MobileNetV2 sedang mengekstrak fitur gambar dan memprediksi kategori sampah.</p>
+                </div>
+
+                <!-- Success Result State -->
+                <div class="result-content hidden" id="result-content">
+                    <div class="result-main-info">
+                        <div class="score-container">
+                            <svg class="progress-ring" width="120" height="120">
+                                <circle class="progress-ring__background" stroke="rgba(255, 255, 255, 0.05)" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                                <circle class="progress-ring__circle" id="confidence-ring" stroke="var(--primary-color)" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                            </svg>
+                            <div class="score-text">
+                                <span class="score-num" id="result-confidence">0%</span>
+                                <span class="score-label">Akurasi</span>
+                            </div>
+                        </div>
+                        <div class="class-title-area">
+                            <div class="badges-wrapper">
+                                <span class="badge" id="category-badge">Kategori Sampah</span>
+                                <span class="badge" id="recycle-badge">Status</span>
+                            </div>
+                            <h3 id="result-class-name">Nama Kategori</h3>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-item">
+                            <div class="info-icon-wrapper desc-icon">
+                                <i data-lucide="info"></i>
+                            </div>
+                            <div class="info-text">
+                                <h4>Deskripsi Kategori</h4>
+                                <p id="result-description">Deskripsi tentang kategori sampah ini dan mengapa ia digolongkan ke kelompok tersebut.</p>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon-wrapper tip-icon">
+                                <i data-lucide="recycle"></i>
+                            </div>
+                            <div class="info-text">
+                                <h4>Panduan Daur Ulang</h4>
+                                <p id="result-recycle-tip">Langkah yang harus dilakukan untuk memilah atau mendaur ulang jenis sampah ini agar ramah lingkungan.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="eco-quote">
+                        <i data-lucide="sparkles" class="quote-icon"></i>
+                        <p>"Memilah sampah dengan benar adalah langkah kecil yang memberikan dampak besar bagi kelangsungan ekosistem kita."</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 RecycleAI. Dibuat menggunakan MobileNetV2 Deep Learning &amp; Flask.</p>
+            <div class="footer-links">
+                <span>Daftar Kategori:</span>
+                <span class="footer-badge">Baterai</span>
+                <span class="footer-badge">Organik</span>
+                <span class="footer-badge">Kardus</span>
+                <span class="footer-badge">Pakaian</span>
+                <span class="footer-badge">Kaca</span>
+                <span class="footer-badge">Logam</span>
+                <span class="footer-badge">Kertas</span>
+                <span class="footer-badge">Plastik</span>
+                <span class="footer-badge">Sepatu</span>
+                <span class="footer-badge">Trash</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Init Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
