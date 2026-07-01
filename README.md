@@ -2,7 +2,7 @@
 title: Sampah Classifier
 emoji: 🗑️
 colorFrom: green
-colorTo: blue
+colorTo: white
 sdk: docker
 app_port: 7860
 ---
